@@ -1,0 +1,268 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Aplikasi Data Siswa',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 255, 0, 0)),
+        useMaterial3: true,
+      ),
+      home: const StudentFormPage(),
+    );
+  }
+}
+
+class StudentFormPage extends StatefulWidget {
+  const StudentFormPage({super.key});
+
+  @override
+  State<StudentFormPage> createState() => _StudentFormPageState();
+}
+
+class _StudentFormPageState extends State<StudentFormPage> {
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _classesController = TextEditingController();
+  final TextEditingController _majorController = TextEditingController();
+
+  final List<Map<String, String>> _students = [];
+  bool isEditing = false; // Menandakan apakah kita dalam mode edit
+  int? editingIndex; // Menyimpan index data yang sedang diedit
+
+  void _addStudent() {
+    setState(() {
+      if (isEditing && editingIndex != null) {
+        // Update data siswa jika sedang dalam mode edit
+        _students[editingIndex!] = {
+          'firstName': _firstNameController.text,
+          'lastName': _lastNameController.text,
+          'classes': _classesController.text,
+          'major': _majorController.text,
+        };
+        isEditing = false;
+        editingIndex = null;
+      } else {
+        // Menambah siswa baru
+        _students.add({
+          'firstName': _firstNameController.text,
+          'lastName': _lastNameController.text,
+          'classes': _classesController.text,
+          'major': _majorController.text,
+        });
+      }
+
+      // Clear input fields
+      _firstNameController.clear();
+      _lastNameController.clear();
+      _classesController.clear();
+      _majorController.clear();
+    });
+  }
+
+  void _deleteStudent(int index) {
+    setState(() {
+      _students.removeAt(index);
+      
+      // Jika sedang dalam mode edit dan baris yang diedit dihapus, reset input fields dan tombol kembali ke Kirim
+      if (isEditing && editingIndex == index) {
+        isEditing = false;
+        editingIndex = null;
+        _firstNameController.clear();
+        _lastNameController.clear();
+        _classesController.clear();
+        _majorController.clear();
+      }
+    });
+  }
+
+  void _editStudent(int index) {
+    setState(() {
+      // Set input fields with existing student data for editing
+      _firstNameController.text = _students[index]['firstName'] ?? '';
+      _lastNameController.text = _students[index]['lastName'] ?? '';
+      _classesController.text = _students[index]['classes'] ?? '';
+      _majorController.text = _students[index]['major'] ?? '';
+      isEditing = true;
+      editingIndex = index; // Save the index of the student being edited
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Aplikasi Data Siswa'),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _firstNameController,
+                decoration: const InputDecoration(
+                  labelText: 'First Name',
+                  border: UnderlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _lastNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Last Name',
+                  border: UnderlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _classesController,
+                decoration: const InputDecoration(
+                  labelText: 'Classes',
+                  border: UnderlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _majorController,
+                decoration: const InputDecoration(
+                  labelText: 'Major',
+                  border: UnderlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 32),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _addStudent,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 179, 255, 0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32.0,
+                      vertical: 16.0,
+                    ),
+                  ),
+                  child: Text(
+                    isEditing ? 'Update' : 'Kirim', // Tombol akan berubah tergantung status isEditing
+                    style: const TextStyle(color: Color.fromARGB(255, 114, 113, 113)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              const Text(
+                'Data Siswa',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              _students.isEmpty
+                  ? const Text('Belum ada data siswa.')
+                  : Table(
+                      border: TableBorder.all(),
+                      columnWidths: const {
+                        0: FlexColumnWidth(2),
+                        1: FlexColumnWidth(2),
+                        2: FlexColumnWidth(1),
+                        3: FlexColumnWidth(2),
+                        4: FlexColumnWidth(1),
+                      },
+                      children: [
+                        const TableRow(
+                          decoration: BoxDecoration(color: Color.fromARGB(255, 56, 50, 50)),
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('Firt Name',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white)),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('Last Name',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white)),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('Class',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white)),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('Major',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white)),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('Actions',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white)),
+                            ),
+                          ],
+                        ),
+                        ..._students.asMap().entries.map(
+                          (entry) {
+                            int index = entry.key;
+                            Map<String, String> student = entry.value;
+                            return TableRow(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(student['firstName'] ?? ''),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(student['lastName'] ?? ''),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(student['classes'] ?? ''),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(student['major'] ?? ''),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit),
+                                        onPressed: () => _editStudent(index),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete, color: Colors.red),
+                                        onPressed: () => _deleteStudent(index),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ).toList(),
+                      ],
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
